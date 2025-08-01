@@ -4,6 +4,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from .models import Customer, Loan
+from rest_framework import status
 from datetime import datetime
 import math
 
@@ -264,3 +265,29 @@ class CreateLoanView(APIView):
             "message": "Loan approved successfully.",
             "monthly_installment": round(emi, 2)
         }, status=201)
+
+
+class ViewLoanDetail(APIView):
+    def get(self, request, loan_id):
+        try:
+            loan = Loan.objects.select_related('customer').get(id=loan_id)
+        except Loan.DoesNotExist:
+            return Response({"error": "Loan not found."}, status=404)
+
+        customer = loan.customer
+
+        return Response({
+            "loan_id": loan.id,
+            "customer": {
+                "id": customer.id,
+                "first_name": customer.first_name,
+                "last_name": customer.last_name,
+                "phone_number": customer.phone_number,
+                "age": customer.age
+            },
+            "loan_amount": loan.loan_amount,
+            "interest_rate": loan.interest_rate,
+            "loan_approved": True,
+            "monthly_installment": round(loan.monthly_installment, 2),
+            "tenure": loan.tenure
+        }, status=200)

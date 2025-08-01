@@ -39,4 +39,6 @@ Response :
   "monthly_installment": 25813.75
 }
 
+http://127.0.0.1:8000/view-loan/1
+
 Load Data : python manage.py load_data
