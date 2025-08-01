@@ -1,0 +1,6 @@
+Run Project : python manage.py runserver
+
+API URL : http://127.0.0.1:8000/register
+				/check-eligibility
+
+Load Data : python manage.py load_data
