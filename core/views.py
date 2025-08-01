@@ -291,3 +291,28 @@ class ViewLoanDetail(APIView):
             "monthly_installment": round(loan.monthly_installment, 2),
             "tenure": loan.tenure
         }, status=200)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ViewCustomerLoansView(APIView):
+    def get(self, request, customer_id):
+        try:
+            customer = Customer.objects.get(id=customer_id)
+        except Customer.DoesNotExist:
+            return Response({"error": "Customer not found."}, status=404)
+
+        today = datetime.now().date()
+        loans = Loan.objects.filter(customer=customer, end_date__gte=today)
+
+        loan_data = []
+        for loan in loans:
+            months_left = max(0, (loan.end_date.year - today.year) * 12 + (loan.end_date.month - today.month))
+            loan_data.append({
+                "loan_id": loan.id,
+                "loan_amount": loan.loan_amount,
+                "interest_rate": loan.interest_rate,
+                "monthly_installment": round(loan.monthly_installment, 2),
+                "repayments_left": months_left
+            })
+
+        return Response(loan_data, status=200)
